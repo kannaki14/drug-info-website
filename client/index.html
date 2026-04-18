@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediGuide | Home</title>
+    <link rel="stylesheet" href="./assets/styles.css" />
+  </head>
+
+  <body>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <h1 class="brand">MediGuide</h1>
+        <nav>
+          <a href="./index.html">Home</a>
+          <a href="./search.html">Search</a>
+          <a href="./about.html">About</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+
+      <!-- 🔍 SEARCH SECTION -->
+      <section class="hero card">
+        <h2>Your Simple Drug Information Companion</h2>
+        <p>
+          Search medicines, view dosage, side effects, and check drug interactions.
+        </p>
+
+        <div class="search-inline">
+          <input
+            id="homeSearchInput"
+            type="text"
+            placeholder="Enter drug name (e.g., Ibuprofen)"
+          />
+          <button id="homeSearchBtn">Search</button>
+        </div>
+      </section>
+
+      <!-- ⚠️ INTERACTION CHECKER -->
+      <section class="card">
+        <h2>Drug Interaction Checker</h2>
+        <p>Enter two drugs to check if they interact.</p>
+
+        <div class="search-inline">
+          <input id="drug1" type="text" placeholder="First drug name" />
+          <input id="drug2" type="text" placeholder="Second drug name" />
+          <button id="checkInteractionBtn">Check</button>
+        </div>
+
+        <div id="interactionResult" class="result-box"></div>
+      </section>
+
+    </main>
+
+    <script src="./assets/main.js"></script>
+  </body>
+</html>

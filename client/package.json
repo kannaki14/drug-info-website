@@ -1,0 +1,14 @@
+{
+  "name": "mediguide-client",
+  "version": "1.0.0",
+  "description": "Frontend for MediGuide website",
+  "scripts": {
+    "start": "npx serve . -l 3000"
+  },
+  "devDependencies": {
+    "serve": "^14.2.3"
+  },
+  "dependencies": {
+    "live-server": "^1.2.2"
+  }
+}
