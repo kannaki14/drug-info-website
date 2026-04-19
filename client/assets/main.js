@@ -1,6 +1,6 @@
 console.log("JS Loaded");
 
-const API_BASE_URL = "http://localhost:5000";
+const API_BASE_URL = "https://drug-backend-lovh.onrender.com";
 
 // ================= COMMON =================
 const setMessage = (el, msg, type = "success") => {
