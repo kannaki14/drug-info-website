@@ -33,7 +33,6 @@ const getDrugNameFromPath = () => {
   const lastPart = decodeURIComponent(parts[parts.length - 1]);
   if (!lastPart) return null;
 
-  // Accept /drug/Paracetamol or /drug.html/Paracetamol style paths.
   if (lastPart.toLowerCase() !== "drug" && lastPart.toLowerCase() !== "drug.html") {
     return lastPart;
   }
@@ -46,15 +45,13 @@ const saveLastDrugName = (name) => {
     if (name && name.trim()) {
       sessionStorage.setItem("lastDrugName", name.trim());
     }
-  } catch (err) {
-    // Ignore storage errors in restricted/private contexts.
-  }
+  } catch {}
 };
 
 const getLastDrugName = () => {
   try {
     return sessionStorage.getItem("lastDrugName");
-  } catch (err) {
+  } catch {
     return null;
   }
 };
@@ -73,35 +70,26 @@ const renderDrugCards = (drugs, container) => {
 };
 
 // ================= API =================
-const fetchAllDrugs = async () => {
-  const res = await fetch(`${API_BASE_URL}/drugs`);
-  const data = await res.json();
-  if (!data.success) throw new Error("Failed to fetch drugs");
-  return data.data;
-};
-
 const fetchDrugByName = async (name) => {
-  const normalizedName = name.trim();
-  const res = await fetch(
-    `${API_BASE_URL}/drugs/${encodeURIComponent(normalizedName)}`
-  );
-  if (!res.ok) {
-    throw new Error("Drug not found");
-  }
+  const res = await fetch(`${API_BASE_URL}/drugs/${encodeURIComponent(name.trim())}`);
+  if (!res.ok) throw new Error("Drug not found");
+
   const data = await res.json();
   if (!data.success) throw new Error("Drug not found");
+
   return data.data;
 };
 
 const checkInteraction = async (drug1, drug2) => {
   const res = await fetch(`${API_BASE_URL}/interactions`, {
     method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({drug1, drug2})
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ drug1, drug2 })
   });
 
   const data = await res.json();
   if (!data.success) throw new Error("Interaction error");
+
   return data;
 };
 
@@ -114,8 +102,9 @@ const initHomePage = () => {
     btn.onclick = () => {
       const val = input.value.trim();
       if (!val) return;
+
       saveLastDrugName(val);
-      window.location.href = `./drug.html?name=${encodeURIComponent(val)}#name=${encodeURIComponent(val)}`;
+      window.location.href = `./drug.html?name=${encodeURIComponent(val)}`;
     };
   }
 
@@ -142,7 +131,6 @@ const initHomePage = () => {
         } else {
           setMessage(resultBox, `⚠ ${res.severity}: ${res.message}`, "error");
         }
-
       } catch (err) {
         setMessage(resultBox, err.message, "error");
       }
@@ -151,27 +139,42 @@ const initHomePage = () => {
 };
 
 // ================= SEARCH =================
-const runSearch = async () => {
-  const q = input.value.trim();
+const initSearchPage = () => {
+  const input = document.getElementById("searchInput");
+  const btn = document.getElementById("searchBtn");
+  const container = document.getElementById("searchResults");
+  const message = document.getElementById("searchMessage");
 
-  if (!q) {
-    container.innerHTML = "";
-    setMessage(message, "Please enter a drug name to search.", "error");
-    return;
-  }
+  if (!input || !btn || !container) return;
 
-  try {
-    showLoading(message, "Searching...");
+  const runSearch = async () => {
+    const q = input.value.trim();
 
-    const drug = await fetchDrugByName(q);
+    if (!q) {
+      container.innerHTML = "";
+      setMessage(message, "Please enter a drug name to search.", "error");
+      return;
+    }
 
-    renderDrugCards([drug], container);
-    setMessage(message, "Result found!", "success");
+    try {
+      showLoading(message, "Searching...");
 
-  } catch (err) {
-    container.innerHTML = "";
-    setMessage(message, "No drugs found for your search.", "error");
-  }
+      const drug = await fetchDrugByName(q);
+
+      renderDrugCards([drug], container);
+      setMessage(message, "Result found!", "success");
+
+    } catch (err) {
+      container.innerHTML = "";
+      setMessage(message, "No drugs found for your search.", "error");
+    }
+  };
+
+  btn.onclick = runSearch;
+
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") runSearch();
+  });
 };
 
 // ================= DETAILS =================
@@ -179,14 +182,11 @@ const initDrugDetailsPage = async () => {
   const el = document.getElementById("detailsContent");
   if (!el) return;
 
-  const name = (
+  const name =
     getQueryParam("name") ||
     getHashParam("name") ||
     getDrugNameFromPath() ||
-    getLastDrugName()
-  );
-
-  console.log("URL NAME:", name);
+    getLastDrugName();
 
   if (!name) {
     el.innerHTML = "<p>No drug name provided</p>";
