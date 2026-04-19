@@ -151,60 +151,27 @@ const initHomePage = () => {
 };
 
 // ================= SEARCH =================
-const initSearchPage = () => {
-  const input = document.getElementById("searchInput");
-  const btn = document.getElementById("searchBtn");
-  const container = document.getElementById("searchResults");
-  const message = document.getElementById("searchMessage");
+const runSearch = async () => {
+  const q = input.value.trim();
 
-  if (!input || !btn || !container) return;
+  if (!q) {
+    container.innerHTML = "";
+    setMessage(message, "Please enter a drug name to search.", "error");
+    return;
+  }
 
-  let allDrugs = [];
+  try {
+    showLoading(message, "Searching...");
 
-  fetchAllDrugs()
-    .then(d => allDrugs = d)
-    .catch(err => console.error(err));
+    const drug = await fetchDrugByName(q);
 
-  const runSearch = () => {
-    const q = input.value.trim().toLowerCase();
+    renderDrugCards([drug], container);
+    setMessage(message, "Result found!", "success");
 
-    if (message) {
-      message.className = "result-box";
-      message.textContent = "";
-    }
-
-    if (!q) {
-      container.innerHTML = "";
-      setMessage(message, "Please enter a drug name to search.", "error");
-      return;
-    }
-
-    const filtered = allDrugs.filter(d =>
-      d.name.toLowerCase().includes(q)
-    );
-
-    if (!filtered.length) {
-      setMessage(message, "No drugs found for your search.", "error");
-    }
-
-    renderDrugCards(filtered, container);
-  };
-
-  btn.onclick = runSearch;
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") runSearch();
-  });
-
-  container.addEventListener("click", (e) => {
-    const link = e.target.closest("a[href*='drug.html?name=']");
-    if (!link) return;
-
-    const url = new URL(link.href, window.location.origin);
-    const selectedName = url.searchParams.get("name");
-    if (selectedName) {
-      saveLastDrugName(decodeURIComponent(selectedName));
-    }
-  });
+  } catch (err) {
+    container.innerHTML = "";
+    setMessage(message, "No drugs found for your search.", "error");
+  }
 };
 
 // ================= DETAILS =================
